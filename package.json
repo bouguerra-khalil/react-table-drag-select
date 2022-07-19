@@ -24,6 +24,7 @@
   "main": "lib",
   "repository": "mcjohnalds/react-table-drag-select",
   "scripts": {
+    "prepare": "npm run build",
     "build": "babel -s true -d lib index.js && webpack",
     "dev": "webpack-dev-server",
     "precommit": "lint-staged && NODE_ENV=production npm run build && git add docs"
