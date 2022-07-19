@@ -26,6 +26,28 @@ export default class TableDragSelect extends React.Component {
         }
       }
     },
+    invalid: props => {
+      const error = new Error(
+        "Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed."
+      );
+      if (!Array.isArray(props.invalid)) {
+        return error;
+      }
+      if (props.invalid.length === 0) {
+        return;
+      }
+      const columnCount = props.invalid[0].length;
+      for (const row of props.invalid) {
+        if (!Array.isArray(row) || row.length !== columnCount) {
+          return error;
+        }
+        for (const cell of row) {
+          if (typeof cell !== "boolean") {
+            return error;
+          }
+        }
+      }
+    },
     maxRows: PropTypes.number,
     maxColumns: PropTypes.number,
     onSelectionStart: PropTypes.func,
@@ -60,6 +82,7 @@ export default class TableDragSelect extends React.Component {
 
   static defaultProps = {
     value: [],
+    invalid: [],
     maxRows: Infinity,
     maxColumns: Infinity,
     onSelectionStart: () => {},
@@ -89,7 +112,9 @@ export default class TableDragSelect extends React.Component {
   render = () => {
     return (
       <table className="table-drag-select">
-        <tbody>{this.renderRows()}</tbody>
+        <tbody>
+          {this.renderRows()}
+        </tbody>
       </table>
     );
   };
@@ -98,18 +123,19 @@ export default class TableDragSelect extends React.Component {
     React.Children.map(this.props.children, (tr, i) => {
       return (
         <tr key={i} {...tr.props}>
-          {React.Children.map(tr.props.children, (cell, j) => (
+          {React.Children.map(tr.props.children, (cell, j) =>
             <Cell
               key={j}
               onTouchStart={this.handleTouchStartCell}
               onTouchMove={this.handleTouchMoveCell}
               selected={this.props.value[i][j]}
+              invalid={this.props.invalid[i][j]}
               beingSelected={this.isCellBeingSelected(i, j)}
               {...cell.props}
             >
               {cell.props.children}
             </Cell>
-          ))}
+          )}
         </tr>
       );
     });
@@ -205,7 +231,8 @@ class Cell extends React.Component {
   // cells
   shouldComponentUpdate = nextProps =>
     this.props.beingSelected !== nextProps.beingSelected ||
-    this.props.selected !== nextProps.selected;
+    this.props.selected !== nextProps.selected ||
+    this.props.invalid !== nextProps.invalid;
 
   componentDidMount = () => {
     // We need to call addEventListener ourselves so that we can pass
@@ -229,6 +256,7 @@ class Cell extends React.Component {
       disabled,
       beingSelected,
       selected,
+      invalid,
       onTouchStart,
       onTouchMove,
       ...props
@@ -237,8 +265,10 @@ class Cell extends React.Component {
       className += " cell-disabled";
     } else {
       className += " cell-enabled";
-      if (selected) {
+      if (selected && !invalid) {
         className += " cell-selected";
+      } else if (invalid) {
+        className += " cell-invalid";
       }
       if (beingSelected) {
         className += " cell-being-selected";
