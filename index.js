@@ -6,7 +6,7 @@ export default class TableDragSelect extends React.Component {
   static propTypes = {
     value: props => {
       const error = new Error(
-        "Invalid prop `value` supplied to `TableDragSelect`. Validation failed."
+        "[ERROR] Invalid prop `value` supplied to `TableDragSelect`. Validation failed."
       );
       if (!Array.isArray(props.value)) {
         return error;
@@ -19,16 +19,11 @@ export default class TableDragSelect extends React.Component {
         if (!Array.isArray(row) || row.length !== columnCount) {
           return error;
         }
-        for (const cell of row) {
-          if (typeof cell !== "boolean") {
-            return error;
-          }
-        }
       }
     },
     invalid: props => {
       const error = new Error(
-        "Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed."
+        "[ERROR] Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed."
       );
       if (!Array.isArray(props.invalid)) {
         return error;
@@ -40,11 +35,6 @@ export default class TableDragSelect extends React.Component {
       for (const row of props.invalid) {
         if (!Array.isArray(row) || row.length !== columnCount) {
           return error;
-        }
-        for (const cell of row) {
-          if (typeof cell !== "boolean") {
-            return error;
-          }
         }
       }
     },
@@ -128,8 +118,8 @@ export default class TableDragSelect extends React.Component {
               key={j}
               onTouchStart={this.handleTouchStartCell}
               onTouchMove={this.handleTouchMoveCell}
-              selected={this.props.value[i][j]}
-              invalid={this.props.invalid[i][j]}
+              selected={this.props.value[i][j] !== 0}
+              invalid={!!this.props.invalid[i][j] !== 0}
               beingSelected={this.isCellBeingSelected(i, j)}
               {...cell.props}
             >
@@ -202,7 +192,7 @@ export default class TableDragSelect extends React.Component {
           this.state.endColumn
         );
         for (let column = minColumn; column <= maxColumn; column++) {
-          value[row][column] = this.state.addMode;
+          value[row][column] = this.state.addMode ? 1 : 0;
         }
       }
       this.setState({ selectionStarted: false });
