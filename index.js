@@ -6,7 +6,7 @@ export default class TableDragSelect extends React.Component {
   static propTypes = {
     value: props => {
       const error = new Error(
-        "Invalid prop `value` supplied to `TableDragSelect`. Validation failed."
+        "[ERROR] Invalid prop `value` supplied to `TableDragSelect`. Validation failed."
       );
       if (!Array.isArray(props.value)) {
         return error;
@@ -19,16 +19,11 @@ export default class TableDragSelect extends React.Component {
         if (!Array.isArray(row) || row.length !== columnCount) {
           return error;
         }
-        for (const cell of row) {
-          if (typeof cell !== "boolean") {
-            return error;
-          }
-        }
       }
     },
     invalid: props => {
       const error = new Error(
-        "Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed."
+        "[ERROR] Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed."
       );
       if (!Array.isArray(props.invalid)) {
         return error;
@@ -40,11 +35,6 @@ export default class TableDragSelect extends React.Component {
       for (const row of props.invalid) {
         if (!Array.isArray(row) || row.length !== columnCount) {
           return error;
-        }
-        for (const cell of row) {
-          if (typeof cell !== "boolean") {
-            return error;
-          }
         }
       }
     },
