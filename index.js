@@ -267,10 +267,7 @@ export default class TableDragSelect extends React.Component {
 class Cell extends React.Component {
   // This optimization gave a 10% performance boost while drag-selecting
   // cells
-  shouldComponentUpdate = nextProps =>
-    this.props.beingSelected !== nextProps.beingSelected ||
-    this.props.selected !== nextProps.selected ||
-    this.props.invalid !== nextProps.invalid;
+  shouldComponentUpdate = nextProps => true;
 
   componentDidMount = () => {
     // We need to call addEventListener ourselves so that we can pass
