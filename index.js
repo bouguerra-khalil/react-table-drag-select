@@ -34,6 +34,36 @@ export default class TableDragSelect extends React.Component {
         }
       }
     },
+    invalid: props => {
+      if (!Array.isArray(props.invalid)) {
+        let error = new Error(
+          "[ NON BINARY VERSION ] Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed. (1)"
+        );
+        return error;
+      }
+      if (props.invalid.length === 0) {
+        return;
+      }
+      const columnCount = props.invalid[0].length;
+      for (const row of props.invalid) {
+        if (!Array.isArray(row) || row.length !== columnCount) {
+          let error = new Error(
+            "[ NON BINARY VERSION ] Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed. (2)"
+          );
+          return error;
+        }
+        for (const cell of row) {
+          if (typeof cell !== "boolean") {
+            let error = new Error(
+              "[ NON BINARY VERSION ] Invalid prop `invalid` supplied to `TableDragSelect`. Validation failed. (3)" +
+                cell +
+                row
+            );
+            return error;
+          }
+        }
+      }
+    },
     classNameMap: PropTypes.objectOf(PropTypes.string),
     setValue: props => {
       const hasClassNameMap = props.classNameMap !== undefined;
@@ -85,6 +115,7 @@ export default class TableDragSelect extends React.Component {
 
   static defaultProps = {
     value: [],
+    invalid: [],
     maxRows: Infinity,
     maxColumns: Infinity,
     onSelectionStart: () => {},
@@ -132,6 +163,7 @@ export default class TableDragSelect extends React.Component {
               onTouchMove={this.handleTouchMoveCell}
               classNameMap={this.props.classNameMap}
               selected={this.props.value[i][j]}
+              invalid={this.props.invalid[i][j]}
               beingSelected={this.isCellBeingSelected(i, j)}
               {...cell.props}
             >
@@ -237,7 +269,8 @@ class Cell extends React.Component {
   // cells
   shouldComponentUpdate = nextProps =>
     this.props.beingSelected !== nextProps.beingSelected ||
-    this.props.selected !== nextProps.selected;
+    this.props.selected !== nextProps.selected ||
+    this.props.invalid !== nextProps.invalid;
 
   componentDidMount = () => {
     // We need to call addEventListener ourselves so that we can pass
@@ -262,15 +295,17 @@ class Cell extends React.Component {
       beingSelected,
       classNameMap = { true: "cell-selected", false: "" },
       selected,
+      invalid,
       onTouchStart,
       onTouchMove,
       ...props
     } = this.props;
     if (disabled) {
       className += " cell-disabled";
+    } else if (invalid) {
+      className += " cell-invalid";
     } else {
       className += " cell-enabled";
-
       className += ` ${classNameMap[selected]}`;
       if (beingSelected) {
         className += " cell-being-selected";

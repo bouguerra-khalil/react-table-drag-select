@@ -46,6 +46,10 @@
   background-color: #A9A9A9;
 }
 
+.table-drag-select td.cell-invalid {
+  background-color: #ff0000;
+}
+
 /* Cells that are in the process of being selected */
 .table-drag-select td.cell-being-selected {
   /* This is the blue color you see when you select text with the cursor */
