@@ -6,7 +6,7 @@ export default class TableDragSelect extends React.Component {
   static propTypes = {
     value: props => {
       const error = new Error(
-        "Invalid prop `value` supplied to `TableDragSelect`. Validation failed."
+        "[ NON BINARY VERSION ] Invalid prop `value` supplied to `TableDragSelect`. Validation failed."
       );
       if (!Array.isArray(props.value)) {
         return error;
@@ -40,7 +40,7 @@ export default class TableDragSelect extends React.Component {
       if (hasClassNameMap) {
         return props.classNameMap[props.setValue] === undefined
           ? new Error(
-              "Invalid prop `setValue` supplied to `TableDragSelect`, must be represented in `classNameMap`"
+              "[ NON BINARY VERSION ] Invalid prop `setValue` supplied to `TableDragSelect`, must be represented in `classNameMap`"
             )
           : undefined;
       }
@@ -48,7 +48,7 @@ export default class TableDragSelect extends React.Component {
         return;
       }
       return new Error(
-        "Invalid prop `setValue` supplied to `TableDragSelect`, must be represented in `classNameMap` or be boolean"
+        "[ NON BINARY VERSION ] Invalid prop `setValue` supplied to `TableDragSelect`, must be represented in `classNameMap` or be boolean"
       );
     },
     maxRows: PropTypes.number,
