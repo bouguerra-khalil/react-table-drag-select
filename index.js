@@ -81,11 +81,36 @@ export default class TableDragSelect extends React.Component {
         "[ NON BINARY VERSION ] Invalid prop `setValue` supplied to `TableDragSelect`, must be represented in `classNameMap` or be boolean"
       );
     },
+    innerValues: props => {
+      const error = new Error(
+        "[ NON BINARY VERSION ] Invalid prop `innerValues` supplied to `TableDragSelect`. Validation failed."
+      );
+      if (!Array.isArray(props.innerValues)) {
+        return error;
+      }
+      if (props.innerValues.length === 0) {
+        return;
+      }
+      const columnCount = props.innerValues[0].length;
+      for (const row of props.innerValues) {
+        if (!Array.isArray(row) || row.length !== columnCount) {
+          return error;
+        }
+      }
+    },
+    setInnerValue: props => {
+      if (props.setInnerValue === undefined) {
+        return new Error(
+          "[ NON BINARY VERSION ] Invalid prop `setInnerValue` supplied to `TableDragSelect`, must be defined"
+        );
+      }
+    },
     maxRows: PropTypes.number,
     maxColumns: PropTypes.number,
     onSelectionStart: PropTypes.func,
     onInput: PropTypes.func,
     onChange: PropTypes.func,
+    onInnerChange: PropTypes.func,
     children: props => {
       if (TableDragSelect.propTypes.value(props)) {
         return; // Let error be handled elsewhere
@@ -143,6 +168,7 @@ export default class TableDragSelect extends React.Component {
   };
 
   render = () => {
+    // console.log("🚀 ~ TableDragSelect ~ this.props", this.props);
     return (
       <table className="table-drag-select">
         <tbody>
@@ -159,10 +185,12 @@ export default class TableDragSelect extends React.Component {
           {React.Children.map(tr.props.children, (cell, j) =>
             <Cell
               key={j}
+              index={j}
               onTouchStart={this.handleTouchStartCell}
               onTouchMove={this.handleTouchMoveCell}
               classNameMap={this.props.classNameMap}
               selected={this.props.value[i][j]}
+              innerValue={this.props.innerValues[i][j]}
               invalid={this.props.invalid[i][j]}
               beingSelected={this.isCellBeingSelected(i, j)}
               {...cell.props}
@@ -228,6 +256,7 @@ export default class TableDragSelect extends React.Component {
     const isTouch = e.type !== "mousedown";
     if (this.state.selectionStarted && (isLeftClick || isTouch)) {
       const value = clone(this.props.value);
+      const innerValues = clone(this.props.innerValues);
       const minRow = Math.min(this.state.startRow, this.state.endRow);
       const maxRow = Math.max(this.state.startRow, this.state.endRow);
       for (let row = minRow; row <= maxRow; row++) {
@@ -241,10 +270,13 @@ export default class TableDragSelect extends React.Component {
         );
         for (let column = minColumn; column <= maxColumn; column++) {
           value[row][column] = this.state.addMode;
+          innerValues[row][column] =
+            this.state.addMode !== 0 ? this.props.setInnerValue : 0;
         }
       }
       this.setState({ selectionStarted: false });
       this.props.onChange(value);
+      this.props.onInnerChange(innerValues);
     }
   };
 
@@ -290,11 +322,13 @@ class Cell extends React.Component {
       className = "",
       disabled,
       beingSelected,
-      classNameMap = { true: "cell-selected", false: "" },
+      classNameMap = { true: "cell-selected", false: "" }, // default value
       selected,
       invalid,
+      innerValue,
       onTouchStart,
       onTouchMove,
+      index,
       ...props
     } = this.props;
     if (disabled) {
@@ -303,22 +337,42 @@ class Cell extends React.Component {
       className += " cell-invalid";
     } else {
       className += " cell-enabled";
+      //Add contrast
+      className +=
+        index !== 0 && Math.floor((index - 1) / 4) % 2 == 0 ? "-contrast" : "";
       className += ` ${classNameMap[selected]}`;
       if (beingSelected) {
         className += " cell-being-selected";
       }
     }
-    return (
-      <td
-        ref={td => (this.td = td)}
-        className={className}
-        onMouseDown={this.handleTouchStart}
-        onMouseMove={this.handleTouchMove}
-        {...props}
-      >
-        {this.props.children || <span>&nbsp;</span>}
-      </td>
-    );
+
+    if (innerValue === 0) {
+      return (
+        <td
+          ref={td => (this.td = td)}
+          className={className}
+          onMouseDown={this.handleTouchStart}
+          onMouseMove={this.handleTouchMove}
+          {...props}
+        >
+          {this.props.children || <span>&nbsp;</span>}
+        </td>
+      );
+    } else {
+      return (
+        <td
+          ref={td => (this.td = td)}
+          className={className}
+          onMouseDown={this.handleTouchStart}
+          onMouseMove={this.handleTouchMove}
+          {...props}
+        >
+          <span>
+            {innerValue}
+          </span>
+        </td>
+      );
+    }
   };
 
   handleTouchStart = e => {

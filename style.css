@@ -29,11 +29,13 @@
   padding-right: 0rem;
 }
 
-/* Cells that can be interacted with */
 .table-drag-select td.cell-enabled {
-  background-color: #DDD;
-  /* Make the cursor a + symbol */
-  cursor: cell;
+  color: #806e52;
+  background-color: #d5d8f5;
+}
+.table-drag-select td.cell-enabled-contrast {
+  color: #806e52;
+  background-color: #ffffff;
 }
 
 /* Cells that cannot be interacted with */
